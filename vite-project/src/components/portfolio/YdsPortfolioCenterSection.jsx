@@ -311,17 +311,26 @@ export default function YdsPortfolioCenterSection() {
                 ? `${Math.round(report.status.totalAssets).toLocaleString("ko-KR")}원`
                 : "—"
             }
+            sub={report.status.quotesIncomplete ? "시세 미수신 종목은 매수금액으로 대체" : undefined}
           />
           <Metric
             label="총 수익률"
             value={signedPct(report.status.totalReturnPct)}
-            tone={returnTone}
+            tone={report.status.quotesIncomplete ? "" : returnTone}
+            sub={report.status.quotesIncomplete ? "시세 수신 후 표시" : undefined}
           />
-          <Metric label="평가손익" value={signedKrw(report.status.totalUnrealizedPnl)} />
+          <Metric
+            label="평가손익"
+            value={signedKrw(report.status.totalUnrealizedPnl)}
+            sub={report.status.quotesIncomplete ? "시세 수신 후 표시" : undefined}
+          />
           <Metric label="실현손익" value={signedKrw(report.status.totalRealizedPnl)} />
           <Metric label="주식 비중" value={`${report.status.stockPct}%`} />
           <Metric label="현금 비중" value={`${report.status.cashPct}%`} />
         </div>
+        {report.status.quotesIncompleteNote ? (
+          <p className="yds-pf-v1__note">{report.status.quotesIncompleteNote}</p>
+        ) : null}
       </section>
 
       <section className="yds-pf-v1__block" aria-labelledby="pfv1-market">

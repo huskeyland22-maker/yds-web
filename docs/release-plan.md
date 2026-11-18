@@ -20,6 +20,21 @@
 - [x] 유사사례 카드화
 - [x] 행동가이드 강조 개선 (현재 단계 scale·glow)
 - [ ] 모바일 가독성 개선
+- [x] **P25 UI** — 디버그 알약 잘림·화면 가림, 관심종목 카드, 종목 차트, PRO 잠금, 레버리지 보드
+- [ ] **Membership OPERATOR 배지** — `audience` 클라이언트 보존 · FREE 플랜 유지 · `audience===operator`만 OPERATOR 표시 · Free access/PRO UI 불변 (로컬, 미커밋)
+- [ ] **UI 1단계 시안 B 전체 디자인 통일** — 딥 네이비 토큰·퍼플 글로우 · 공통 카드/입력 · home/value-chain/reco/trading/admin 서피스 (로컬, 미커밋 · 메뉴 구조·차트 Tooltip 제외)
+- [ ] **UI 2단계 사이드 메뉴** — 메인/모바일에서 ‘종목 분석’ 그룹 제목만 제거 · 종목 검색·관심 종목·라우트 유지 (로컬, 미커밋)
+- [ ] **UI 3단계 PC·모바일 통일** — overflow clip · 공통 여백 · 터치 영역 · 헤더 wrap · 표 내부 가로스크롤 (로컬, 미커밋 · 차트 Tooltip 제외)
+- [ ] **UI 4단계** — 종목검색·관심종목→기타기능 · 멤버십/로그인/버전→사이드바 계정 · 차트·표·Tooltip·버튼 세부 (로컬, 미커밋)
+- [ ] **사이드바 계정 카드 통합** — MEMBERSHIP+로그인 유저를 단일 카드 · 버전/sync는 카드 외부 · PC·모바일 드로어 동일 (로컬, 미커밋 · 인증/권한/API 미변경)
+- [ ] **사이드바 고정·계정 간소화** — PC 사이드바 viewport 고정 · 메뉴만 스크롤 · 계정 dock · ledger 접기 · 모바일 드로어 dock (로컬, 미커밋)
+- [ ] **UI 5단계 전문가형 마감** — 계정 최소화 · 사이드바 타이포/선택 절제 · `/market-analysis` 헤더·위험지수·종목·우측카드 통일 (로컬, 미커밋 · 인증/권한 미변경)
+- [ ] **UI 6단계 사이드바 그룹 제목 강조** — MARKET/STRATEGY 등 kicker 확대·대비 · 그룹 간격 정리 · 계정/메뉴 미변경 (로컬, 미커밋)
+- [ ] **UI 7단계 시장위험분석 시안 B** — 티커바·게이지/요약/AI리포트·지표카드·신호테이블·연구KPI 레이아웃 · 가짜수치 없음 (로컬, 미커밋)
+- [ ] **UI 7 RC 보완** — 히어로 3열 empty 유지 · History/FEAR/Drivers 빈상태 · 종목데스크 밀도 · MISSING=허브/실수집 없음 (로컬, 미커밋)
+- [ ] **환경 구분 표시** — `/market-analysis` 시세바 상단 · LOCAL/PRODUCTION/PREVIEW 실설정 판별 · VIX/CNN/PutCall 기준일 · LIVE/STALE (로컬, 미커밋)
+- [ ] **사이드바 5그룹 IA** — MARKET/CREDIT/STRATEGY/RESEARCH/AI · 허브 화면 · 기존 라우트 유지 · 신용 사이클 안내 (로컬, 미커밋)
+- [ ] **STRATEGY 데스크 디자인** — DBB/개별/레버리지/패닉허브/매매일지 딥네이비 통일 · 로직·라우트·PRO 유지 (로컬, 미커밋)
 
 ## 기능
 
@@ -200,9 +215,23 @@
 - [x] **매수 기록 계정 동기화** — Firebase 로그인 시 Supabase `user_trade_records` · `/api/trade-records-sync`(portfolio-sync rewrite) · localStorage 캐시 · Hobby 12 유지
 - [x] **매수 기록 목록 수량 표시** — 저장 행에 `N주` 포함 (`날짜 | 가격 | 수량 | 금액 | 비중`) · shares 없으면 `—`
 - [x] **Hobby Serverless 12개 한도 대응** — DBB를 `market-data` dispatch+rewrite로 통합 · `/api/daily-bottom-buy` URL 유지 · Panic 미변경
-- [ ] AI 리포트 개선
+- [x] **P26 AI 리포트 UI** — 제목·기준일, 종합 해석, 전망·위험·지표 카드, 모바일 본문 여백
 - [ ] 패닉지수 데이터 검증
 - [ ] 연구실 기능 정리
+- [x] **P27 연구실 UI** — 제목·도구 카드·탭·입력/결과 구분·모바일 넘침
+- [x] **P28 사이드바 메뉴** — MARKET·STRATEGY·RESEARCH·AI & ACCOUNT · 포트폴리오·매매일지·매수 경로 유지
+- [x] **P29 패닉 연구실 UI** — 시안 B 딥 네이비 · 히스토리/결과 구분 · 지표 숫자 대비
+- [x] **P30 딥 네이비 디자인 시스템** — 프리미엄 셸 공통 토큰 · 본문/카드/입력 명도 단계 · 주요 화면 밝은 잔여면 제거
+- [x] **P31 딥 네이비 회귀 검수** — 보조 페이지·모달 검수 · 설정 다이얼로그·잔여 하드코드 색 보완
+- [x] **P32 운영 전 기능 안정성 검수** — 패닉·AI·포트폴리오·권한·API 코드/단위 검수 · Prod DB·권한 미변경 · 임시 Owner PRO 우회는 배포 전 해소 필요
+- [x] **P33 배포 차단 항목** — 패닉 UI를 `detailAccess`(PRO|operator)로 정렬 · 임시 Owner PRO는 계정 정식 경로 확인 전 유지 · 포트폴리오 시세 미수신 합계 표시 · engine 테스트 기대값 근거 수정 · panic 스키마 읽기전용 점검 SQL draft
+- [x] **P34 권한·데이터 연결 사전 검증** — Owner 우회 영향 범위·스키마 draft 정적 검토·포트폴리오 UI 재확인 · 계정/DB/claim 미변경 · 임시 PRO 미제거
+
+### Owner PRO 전환 (배포 전 수동)
+1. Firebase `role=operator` **또는** `user_membership` active PRO 확인 (계정 변경은 운영자가 수행)
+2. `/api/me-membership`에서 `detailAccess: true` (operator면 `plan`은 free 가능)
+3. 패닉 히스토리·DBB 상세가 열리는지 확인
+4. 그 다음 `temporaryOwnerPro.js` 및 handler 호출 제거
 
 ## 버그
 

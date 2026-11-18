@@ -6,6 +6,7 @@ import {
   buildV5Holdings,
   replayPortfolioFromTrades,
 } from "../vite-project/src/content/ydsPortfolioV5Engine.js"
+import { buildPortfolioCenterV1Report } from "../vite-project/src/content/ydsPortfolioCenterEngine.js"
 import { resolveMarketAdapterContext } from "../vite-project/src/content/ydsMarketAdapter.js"
 
 function assert(cond, msg) {
@@ -95,9 +96,22 @@ assert(analysis.compliance.compliancePct >= 0, "compliance")
 const sorted = buildV5Holdings(trades, 0, quoteMap, "returnPct", 1350)
 assert(sorted.rows[0].ticker === "NVDA", "sort by return puts NVDA first")
 
+const partialQuotes = new Map([[nvdaLot.id, quoteMap.get(nvdaLot.id)]])
+const partialHoldings = buildV5Holdings(trades, 0, partialQuotes, "returnPct", 1350)
+assert(
+  partialHoldings.rows.some((r) => r.unrealizedPnl == null),
+  "missing quote leaves unrealized null",
+)
+const center = buildPortfolioCenterV1Report(trades, 0, ctx, partialQuotes, 1350, partialHoldings)
+assert(center.status.quotesIncomplete === true, "center flags incomplete quotes")
+assert(center.status.totalUnrealizedPnl == null, "status unrealized hidden when incomplete")
+assert(center.status.totalReturnPct == null, "status return hidden when incomplete")
+assert(partialHoldings.totalUnrealizedPnl != null, "V5 engine still computes numeric totals")
+
 console.log("OK portfolio v5/v6", {
   nvdaReturn: nvdaRow.returnPct,
   lsReturn: lsRow.returnPct,
   totalReturn: holdings.totalReturnPct,
   compliance: analysis.compliance.compliancePct,
+  quotesIncomplete: center.status.quotesIncomplete,
 })
