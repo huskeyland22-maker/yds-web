@@ -77,7 +77,7 @@ describe("panic card metric values", () => {
       updatedAt: "2026-11-05T21:00:00.000Z",
     }
     expect(resolveLivePanicData(seed, staging, null)?.date).toBe("2026-11-05")
-    expect(classifyPanicScoreState(staging, NOW)).toBe(DATA_STATE.STALE)
+    expect(classifyPanicScoreState(staging, NOW)).toBe(DATA_STATE.DELAYED)
   })
 
   it("does not turn a null history field into zero, and keeps HY zero", () => {

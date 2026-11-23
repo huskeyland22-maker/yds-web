@@ -1,12 +1,20 @@
 /**
  * 시장 위험 화면의 데이터 상태.
  * 점수식은 바꾸지 않고, 이미 계산된 값을 어떤 상태로 보여줄지만 정한다.
+ * 핵심 3지표(VIX·CNN·Put/Call) 신선도는 미국장 거래일 세션 기준이다.
  */
+import {
+  classifyPanicCoreFreshness,
+  panicCoreMetricsComplete,
+} from "../../../api/_lib/usEquitySession.js"
 import { PANIC_HISTORY_SEED } from "./panicHistorySeed.js"
 import { isPanicBusinessDataStale } from "./validatePanicData.js"
 
 export const DATA_STATE = Object.freeze({
   LIVE: "LIVE",
+  WAITING: "WAITING",
+  DELAYED: "DELAYED",
+  /** @deprecated Prefer DELAYED for US-session lag; kept for CSS / older callers */
   STALE: "STALE",
   SEED: "SEED",
   MISSING: "MISSING",
@@ -14,8 +22,7 @@ export const DATA_STATE = Object.freeze({
 })
 
 /**
- * 코드에 지표별 신선도 일이 없어, 수집 주기만 보고 정한 기준.
- * VIX·CNN·Put/Call은 일별 시세, BofA는 수동 입력, HY는 FRED 일별 지연.
+ * 보조 지표(BofA·HY)용 달력일 한도. 핵심 3지표는 US 세션 판정을 쓴다.
  * 기존 공통 한도는 validatePanicData의 120일이다.
  */
 export const METRIC_FRESH_DAYS = Object.freeze({
@@ -27,7 +34,16 @@ export const METRIC_FRESH_DAYS = Object.freeze({
 })
 
 const SCORE_INPUTS = ["vix", "cnn", "putCall"]
+const CORE_METRIC_IDS = new Set(SCORE_INPUTS)
 const CONFIRMED_SOURCES = new Set(["HUB", "API", "HISTORY"])
+
+function mapCoreFreshnessToDataState(status) {
+  if (status === "live") return DATA_STATE.LIVE
+  if (status === "waiting") return DATA_STATE.WAITING
+  if (status === "delayed") return DATA_STATE.DELAYED
+  if (status === "error") return DATA_STATE.MISSING
+  return DATA_STATE.UNKNOWN
+}
 
 /** null, undefined, 빈 문자열은 결측이다. 숫자 0은 유지한다. */
 export function readFiniteMetric(value) {
@@ -188,28 +204,60 @@ export function classifyMetricState(panicData, metricId, now = new Date()) {
   if (isSeedMetricValue(panicData, metricId)) return DATA_STATE.SEED
   const date = panicAsOfDate(panicData)
   if (!date) return DATA_STATE.UNKNOWN
+
+  const payloadStale = hasConfirmedCollection(panicData) && isPanicBusinessDataStale(panicData)
+  if (payloadStale) return DATA_STATE.DELAYED
+
+  if (CORE_METRIC_IDS.has(metricId)) {
+    if (!hasConfirmedCollection(panicData) && !panicCoreMetricsComplete(panicData)) {
+      return DATA_STATE.UNKNOWN
+    }
+    if (!hasConfirmedCollection(panicData)) return DATA_STATE.UNKNOWN
+    const freshness = classifyPanicCoreFreshness({
+      asOfDate: date,
+      coreComplete: panicCoreMetricsComplete(panicData),
+      now,
+    })
+    return mapCoreFreshnessToDataState(freshness.status)
+  }
+
   const age = ageDays(date, now)
   const limit = METRIC_FRESH_DAYS[metricId]
   if (age == null || limit == null) return DATA_STATE.UNKNOWN
-  const payloadStale = hasConfirmedCollection(panicData) && isPanicBusinessDataStale(panicData)
-  if (age > limit || payloadStale) return DATA_STATE.STALE
+  if (age > limit) return DATA_STATE.STALE
   if (hasConfirmedCollection(panicData)) return DATA_STATE.LIVE
   return DATA_STATE.UNKNOWN
 }
 
 export function classifyPanicScoreState(panicData, now = new Date()) {
-  const states = SCORE_INPUTS.map((id) => classifyMetricState(panicData, id, now))
-  if (states.some((state) => state === DATA_STATE.SEED)) return DATA_STATE.SEED
-  if (states.some((state) => state === DATA_STATE.MISSING)) return DATA_STATE.MISSING
-  if (states.some((state) => state === DATA_STATE.UNKNOWN)) return DATA_STATE.UNKNOWN
-  if (states.some((state) => state === DATA_STATE.STALE)) return DATA_STATE.STALE
-  return DATA_STATE.LIVE
+  if (!panicData || typeof panicData !== "object") return DATA_STATE.MISSING
+  if (SCORE_INPUTS.some((id) => isSeedMetricValue(panicData, id))) return DATA_STATE.SEED
+  if (!panicCoreMetricsComplete(panicData)) return DATA_STATE.MISSING
+
+  const date = panicAsOfDate(panicData)
+  if (!date) return DATA_STATE.UNKNOWN
+  if (hasConfirmedCollection(panicData) && isPanicBusinessDataStale(panicData)) {
+    return DATA_STATE.DELAYED
+  }
+  if (!hasConfirmedCollection(panicData)) return DATA_STATE.UNKNOWN
+
+  const freshness = classifyPanicCoreFreshness({
+    asOfDate: date,
+    coreComplete: true,
+    now,
+  })
+  return mapCoreFreshnessToDataState(freshness.status)
 }
 
 export function panicFreshnessNotice(state) {
   if (state === DATA_STATE.SEED) return "시드 데이터입니다. 실시간 값이 아닙니다."
-  if (state === DATA_STATE.STALE) return "수집된 값이지만 기준일이 오래되었습니다. 최신 수집값이 아닙니다."
+  if (state === DATA_STATE.WAITING) {
+    return "미국장 거래 구간입니다. 직전 거래일 수동 입력을 유지하며 당일 확정 입력을 기다립니다."
+  }
+  if (state === DATA_STATE.DELAYED || state === DATA_STATE.STALE) {
+    return "미국장 기준 입력 가능 시간이 지났습니다. 최신 거래일 수동 입력이 필요합니다."
+  }
   if (state === DATA_STATE.MISSING) return "최신 데이터 없음"
   if (state === DATA_STATE.UNKNOWN) return "출처 또는 기준일을 확인하지 못했습니다."
-  return "수집된 최신 스냅샷입니다."
+  return "최신 완료 거래일 기준 수동 입력 스냅샷입니다."
 }

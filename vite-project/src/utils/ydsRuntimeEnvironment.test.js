@@ -106,7 +106,7 @@ describe("ydsRuntimeEnvironment", () => {
     )
     expect(model.label).toBe("LOCAL · STAGING CONNECTED")
     expect(model.dataSource).toBe("STAGING")
-    expect(model.scoreState).toBe("STALE")
+    expect(model.scoreState).toBe("DELAYED")
     expect(model.sharedAsOf).toBe("2026-11-05")
     expect(model.asOfSummary).toBe("VIX · CNN · Put/Call 기준일 2026-11-05")
     expect(model.updatedLabel).toMatch(/2026-11-05/)
