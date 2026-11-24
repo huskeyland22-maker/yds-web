@@ -126,7 +126,6 @@ export const SHELL_NAV_MAIN = [
     kind: "link",
     path: "/credit-cycle",
     emphasis: true,
-    statusLabel: "준비 중",
     matchPaths: ["/credit-cycle"],
   },
   {

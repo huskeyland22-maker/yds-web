@@ -44,7 +44,7 @@ describe("ydsShellNavConfig — 5대메뉴 IA", () => {
   it("wires 시장 브리핑 and strategy leaves to live pages, not hubs", () => {
     expect(findItem("market-briefing")?.path).toBe("/market-analysis")
     expect(findItem("credit-cycle")?.path).toBe("/credit-cycle")
-    expect(SHELL_NAV_MAIN.find((entry) => entry.id === "credit-cycle")?.statusLabel).toBe("준비 중")
+    expect(SHELL_NAV_MAIN.find((entry) => entry.id === "credit-cycle")?.statusLabel).toBeUndefined()
 
     const strategy = SHELL_NAV_MAIN.find((entry) => entry.id === "adjustment-strategy")
     expect(strategy?.kind).toBe("accordion")

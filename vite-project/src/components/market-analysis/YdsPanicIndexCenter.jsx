@@ -498,7 +498,7 @@ export default function YdsPanicIndexCenter({
           <div className="yds-panic-center__credit-ref" aria-label="신용 사이클 참고 지표">
             <p className="yds-panic-center__credit-ref-title">
               신용 참고 · Panic 점수 미포함 ·{" "}
-              <Link to="/credit-cycle">신용 사이클(준비 중)</Link>
+              <Link to="/credit-cycle">신용 사이클</Link>
             </p>
             <div className="yds-panic-center__metric-grid yds-panic-center__metric-grid--credit">
               {creditRefCards.map((card) => {
