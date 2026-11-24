@@ -2,11 +2,8 @@
  * Credit Cycle read API — Phase 9 scaffolding.
  *
  * GET ?mode=latest | history | indicators
- * Rewrites (root vercel.json):
- *   /api/credit-cycle/latest → ?mode=latest
- *   /api/credit-cycle/history → ?mode=history
- *   /api/credit-cycle/indicators → ?mode=indicators
- *
+ * Not a Vercel serverless entry (Hobby 12-function cap).
+ * Local Vite middleware imports this module for /api/credit-cycle.
  * Default: disabled (503). Does not use VITE_SUPABASE_URL fallback.
  * Does not write DB. Panic-independent.
  */
@@ -16,7 +13,7 @@ import {
   handleCreditCycleLatest,
   creditCycleNoStore,
   buildCreditCycleDisabledPayload,
-} from "./_lib/creditCycleApiHandlers.js"
+} from "./creditCycleApiHandlers.js"
 
 /** @param {string} raw */
 function normalizeMode(raw) {

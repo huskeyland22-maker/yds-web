@@ -490,7 +490,7 @@ describe("snapshot + hobby cap", () => {
     assert.match(gen, /summary-only/)
   })
 
-  it("serverless entry count stays 13 (credit-cycle api entry allowed)", () => {
+  it("serverless entry count stays 12 (no new api/*.js entry)", () => {
     const apiRoot = join(root, "api")
     /** @type {string[]} */
     const out = []
@@ -507,7 +507,7 @@ describe("snapshot + hobby cap", () => {
       }
     }
     walk(apiRoot)
-    assert.equal(out.length, 13)
+    assert.equal(out.length, 12)
     assert.ok(!existsSync(join(root, "api/daily-bottom-buy.js")))
   })
 })

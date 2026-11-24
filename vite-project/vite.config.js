@@ -187,7 +187,8 @@ function loadCreditCycleStagingEnv() {
 
 /** Local Credit Cycle Staging API — CREDIT_CYCLE_* only; Production refused. */
 function attachCreditCycleDevApi(server) {
-  const handlerPath = path.resolve(process.cwd(), "../api/credit-cycle.js")
+  // Hobby serverless entry cap: keep CC HTTP handler under api/_lib (local Vite only).
+  const handlerPath = path.resolve(process.cwd(), "../api/_lib/creditCycleHttp.js")
   server.middlewares.use(async (req, res, next) => {
     const raw = req.url || ""
     const pathOnly = raw.split("?")[0]

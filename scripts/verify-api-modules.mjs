@@ -49,7 +49,7 @@ const modules = [
   "api/market-data.js",
   "api/_lib/creditCycleEnv.js",
   "api/_lib/creditCycleApiHandlers.js",
-  "api/credit-cycle.js",
+  "api/_lib/creditCycleHttp.js",
 ]
 
 let failed = 0

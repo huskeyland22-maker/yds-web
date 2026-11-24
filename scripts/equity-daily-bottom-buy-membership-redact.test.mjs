@@ -400,7 +400,7 @@ describe("equity gate wiring + hobby cap + no public equity snapshot", () => {
     assert.ok(!names.some((n) => /equity.*daily.*bottom|equity-daily-bottom/i.test(n)))
   })
 
-  it("serverless entry count stays 13 (credit-cycle api entry allowed)", () => {
+  it("serverless entry count stays 12 (no new api/*.js entry)", () => {
     const apiRoot = join(root, "api")
     /** @type {string[]} */
     const out = []
@@ -417,7 +417,7 @@ describe("equity gate wiring + hobby cap + no public equity snapshot", () => {
       }
     }
     walk(apiRoot)
-    assert.equal(out.length, 13)
+    assert.equal(out.length, 12)
     assert.ok(!existsSync(join(root, "api/equity-daily-bottom-buy.js")))
   })
 })
