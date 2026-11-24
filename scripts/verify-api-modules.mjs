@@ -47,6 +47,9 @@ const modules = [
   "api/_lib/equityDailyBottomBuyRedact.js",
   "api/_lib/equityDailyBottomBuyHandler.js",
   "api/market-data.js",
+  "api/_lib/creditCycleEnv.js",
+  "api/_lib/creditCycleApiHandlers.js",
+  "api/credit-cycle.js",
 ]
 
 let failed = 0
