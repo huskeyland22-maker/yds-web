@@ -1,0 +1,842 @@
+{
+  "meta": {
+    "source": "phase4-warning-validation-raw",
+    "feedStatus": "RESEARCH_SNAPSHOT",
+    "mode": "license_safe",
+    "note": "Phase4 PIT 연구 스냅샷. 실시간 API 피드 아님. HY/BBB 수치 미포함.",
+    "generatedFromReportAt": "2026-11-24T05:04:52.185Z",
+    "warningThresholdsLocked": false,
+    "warningEvidence": "INSUFFICIENT_EVIDENCE"
+  },
+  "latest": {
+    "asOf": "2023-12-31",
+    "cci": 32.7,
+    "cciPrior": 50.8,
+    "cciMomentum": -18.099999999999994,
+    "coverage": 1,
+    "confidence": "MEDIUM",
+    "cciStatus": "OK",
+    "pit": "PIT",
+    "available": 5,
+    "missing": [],
+    "elevatedCount": 1,
+    "indicators": [
+      {
+        "id": "sloos",
+        "score": 63,
+        "quality": "VALID"
+      },
+      {
+        "id": "cpff",
+        "score": 7,
+        "quality": "STALE"
+      },
+      {
+        "id": "bank",
+        "score": 16,
+        "quality": "VALID"
+      },
+      {
+        "id": "cre",
+        "score": 41,
+        "quality": "DELAYED"
+      },
+      {
+        "id": "corp_delinq",
+        "score": 15,
+        "quality": "DELAYED"
+      }
+    ]
+  },
+  "history": {
+    "COVID": {
+      "mode": "PIT",
+      "eventDate": "2020-03-15",
+      "peak": {
+        "asOf": "2020-09-30",
+        "cci": 50.3
+      },
+      "path": [
+        {
+          "asOf": "2019-03-31",
+          "cci": 37.4,
+          "cciMomentum": null,
+          "coverage": 1,
+          "confidence": "MEDIUM",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 67,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 16,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 58,
+              "quality": "STALE"
+            },
+            {
+              "id": "cre",
+              "score": 14,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 14,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2019-06-30",
+          "cci": 23.9,
+          "cciMomentum": -13.5,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 41,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 5,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 13,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 27,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2019-09-30",
+          "cci": 37.2,
+          "cciMomentum": 13.300000000000004,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 59,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 66,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 14,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 19,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2019-12-31",
+          "cci": 38.5,
+          "cciMomentum": 1.2999999999999972,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 68,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 42,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 16,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 16,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 27,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2020-03-31",
+          "cci": 35.5,
+          "cciMomentum": -3,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 33,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 93,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 17,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 14,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 27,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2020-06-30",
+          "cci": 48.8,
+          "cciMomentum": 13.299999999999997,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 87,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 62,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 18,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 29,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 23,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2020-09-30",
+          "cci": 50.3,
+          "cciMomentum": 1.5,
+          "coverage": 1,
+          "confidence": "MEDIUM",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 94,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 38,
+              "quality": "STALE"
+            },
+            {
+              "id": "bank",
+              "score": 19,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 31,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 34,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2020-12-31",
+          "cci": 40.7,
+          "cciMomentum": -9.599999999999994,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 70,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 24,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 19,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 32,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 33,
+              "quality": "DELAYED"
+            }
+          ]
+        }
+      ],
+      "note": "사전 WARNING@T>=50 미확인 (Phase3/4)"
+    },
+    "STRESS_2022_23": {
+      "mode": "PIT",
+      "eventDate": "2023-03-10",
+      "peak": {
+        "asOf": "2023-09-30",
+        "cci": 50.8
+      },
+      "path": [
+        {
+          "asOf": "2021-03-31",
+          "cci": 32.8,
+          "cciMomentum": null,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 46,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 13,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 20,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 40,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 32,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2021-06-30",
+          "cci": 20.7,
+          "cciMomentum": -12.099999999999998,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 14,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 30,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 16,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 26,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 23,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2021-09-30",
+          "cci": 19.1,
+          "cciMomentum": -1.5999999999999979,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 3,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 57,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 22,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 16,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2021-12-31",
+          "cci": 20.2,
+          "cciMomentum": 1.0999999999999979,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 8,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 59,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 17,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 16,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2022-03-31",
+          "cci": 26.5,
+          "cciMomentum": 6.300000000000001,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 12,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 89,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 13,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 21,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2022-06-30",
+          "cci": 42.2,
+          "cciMomentum": 15.700000000000003,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 61,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 94,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 14,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 16,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 19,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2022-09-30",
+          "cci": 45.2,
+          "cciMomentum": 3,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 81,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 74,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 14,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 14,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 20,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2022-12-31",
+          "cci": 45.3,
+          "cciMomentum": 0.09999999999999432,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 87,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 57,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 8,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 27,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2023-03-31",
+          "cci": 46.8,
+          "cciMomentum": 1.5,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 92,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 66,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 14,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 17,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2023-06-30",
+          "cci": 49.2,
+          "cciMomentum": 2.4000000000000057,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 93,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 72,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 14,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 24,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 16,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2023-09-30",
+          "cci": 50.8,
+          "cciMomentum": 1.5999999999999943,
+          "coverage": 1,
+          "confidence": "HIGH",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 91,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 74,
+              "quality": "VALID"
+            },
+            {
+              "id": "bank",
+              "score": 15,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 29,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 20,
+              "quality": "DELAYED"
+            }
+          ]
+        },
+        {
+          "asOf": "2023-12-31",
+          "cci": 32.7,
+          "cciMomentum": -18.099999999999994,
+          "coverage": 1,
+          "confidence": "MEDIUM",
+          "pit": "PIT",
+          "status": "OK",
+          "indicators": [
+            {
+              "id": "sloos",
+              "score": 63,
+              "quality": "VALID"
+            },
+            {
+              "id": "cpff",
+              "score": 7,
+              "quality": "STALE"
+            },
+            {
+              "id": "bank",
+              "score": 16,
+              "quality": "VALID"
+            },
+            {
+              "id": "cre",
+              "score": 41,
+              "quality": "DELAYED"
+            },
+            {
+              "id": "corp_delinq",
+              "score": 15,
+              "quality": "DELAYED"
+            }
+          ]
+        }
+      ],
+      "note": "warn>=50 사전 경고 없음; T=40-45는 CONDITIONAL 연구 신호"
+    },
+    "GFC": {
+      "mode": "NON_PIT",
+      "eventDate": "2008-09-15",
+      "peak": {
+        "asOf": "2008-12-31",
+        "cci": 72.7
+      },
+      "path": null,
+      "note": "ALFRED PIT NOT_TESTABLE · NON_PIT 참고만"
+    }
+  },
+  "indicatorCatalog": {
+    "hy": {
+      "label": "HY Spread",
+      "frequency": "daily",
+      "licenseRestricted": true
+    },
+    "bbb": {
+      "label": "BBB Spread",
+      "frequency": "daily",
+      "licenseRestricted": true
+    },
+    "sloos": {
+      "label": "Fed SLOOS",
+      "frequency": "quarterly",
+      "licenseRestricted": false
+    },
+    "cpff": {
+      "label": "CPFF 자금시장",
+      "frequency": "daily",
+      "licenseRestricted": false
+    },
+    "bank": {
+      "label": "Bank Soundness",
+      "frequency": "quarterly",
+      "licenseRestricted": false
+    },
+    "cre": {
+      "label": "CRE Delinquency",
+      "frequency": "quarterly",
+      "licenseRestricted": false
+    },
+    "corp_delinq": {
+      "label": "Corporate Delinquency",
+      "frequency": "quarterly",
+      "licenseRestricted": false
+    }
+  }
+}

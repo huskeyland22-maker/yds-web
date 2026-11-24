@@ -158,6 +158,98 @@ function meMembershipDevApi() {
   }
 }
 
+/** Load CREDIT_CYCLE_* from repo-root .env.staging.local (no secret logging). */
+function loadCreditCycleStagingEnv() {
+  const envPath = path.resolve(process.cwd(), "../.env.staging.local")
+  if (!fs.existsSync(envPath)) return { ok: false, reason: "missing_env_file" }
+  const text = fs.readFileSync(envPath, "utf8")
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim()
+    if (!line || line.startsWith("#")) continue
+    const eq = line.indexOf("=")
+    if (eq <= 0) continue
+    const key = line.slice(0, eq).trim()
+    let val = line.slice(eq + 1).trim()
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1)
+    }
+    if (!key.startsWith("CREDIT_CYCLE_") && key !== "VITE_CREDIT_CYCLE_USE_STAGING_API") continue
+    if (key && process.env[key] == null) process.env[key] = val
+  }
+  const ccUrl = String(process.env.CREDIT_CYCLE_SUPABASE_URL || "").trim()
+  if (ccUrl.includes(PRODUCTION_SUPABASE_REF)) return { ok: false, reason: "production_url_refused" }
+  if (!ccUrl.includes(STAGING_SUPABASE_REF)) return { ok: false, reason: "staging_url_required" }
+  return { ok: true }
+}
+
+/** Local Credit Cycle Staging API — CREDIT_CYCLE_* only; Production refused. */
+function attachCreditCycleDevApi(server) {
+  const handlerPath = path.resolve(process.cwd(), "../api/credit-cycle.js")
+  server.middlewares.use(async (req, res, next) => {
+    const raw = req.url || ""
+    const pathOnly = raw.split("?")[0]
+    if (pathOnly !== "/api/credit-cycle" && !pathOnly.startsWith("/api/credit-cycle/")) {
+      return next()
+    }
+    try {
+      const staged = loadCreditCycleStagingEnv()
+      if (!staged.ok) {
+        res.statusCode = 503
+        res.setHeader("Content-Type", "application/json; charset=utf-8")
+        res.end(JSON.stringify({ ok: false, reason: staged.reason, feedStatus: "API_DISABLED" }))
+        return
+      }
+      // Arm read path for local Vite only (never logged).
+      process.env.CREDIT_CYCLE_API_ENABLED = "1"
+      process.env.CREDIT_CYCLE_DATA_MODE = "staging"
+      process.env.CREDIT_CYCLE_ALLOW_REMOTE = "1"
+
+      const mod = await import(pathToFileURL(handlerPath).href)
+      const handler = mod.default
+      await handler(
+        { method: req.method, url: raw, headers: req.headers, query: {} },
+        {
+          setHeader(name, value) {
+            res.setHeader(name, value)
+          },
+          status(code) {
+            res.statusCode = code
+            return this
+          },
+          get statusCode() {
+            return res.statusCode
+          },
+          set statusCode(v) {
+            res.statusCode = v
+          },
+          end(body) {
+            res.end(body)
+          },
+        },
+      )
+    } catch {
+      res.statusCode = 503
+      res.setHeader("Content-Type", "application/json; charset=utf-8")
+      res.end(JSON.stringify({ ok: false, reason: "credit_cycle_dev_failed" }))
+    }
+  })
+}
+
+function creditCycleDevApi() {
+  return {
+    name: "credit-cycle-dev-api",
+    configureServer(server) {
+      attachCreditCycleDevApi(server)
+    },
+    configurePreviewServer(server) {
+      attachCreditCycleDevApi(server)
+    },
+  }
+}
+
 function dailyBottomBuyDevApi() {
   const handlerPath = path.resolve(process.cwd(), "../api/_lib/dailyBottomBuyHandler.js")
   return {
@@ -281,6 +373,11 @@ export default defineConfig({
     "import.meta.env.VITE_APP_VERSION_LABEL": JSON.stringify(APP_VERSION_LABEL),
     "import.meta.env.VITE_APP_RELEASE_CHANNEL": JSON.stringify(APP_RELEASE_CHANNEL),
   },
+  resolve: {
+    alias: {
+      "@yds-credit-cycle": path.resolve(__dirname, "../src/credit-cycle"),
+    },
+  },
   build: {
     emptyOutDir: true,
     rollupOptions: {
@@ -294,6 +391,7 @@ export default defineConfig({
   plugins: [
     react(),
     meMembershipDevApi(),
+    creditCycleDevApi(),
     dailyBottomBuyDevApi(),
     equityDailyBottomBuyDevApi(),
     htmlBuildIdPlugin(),
@@ -368,6 +466,9 @@ export default defineConfig({
   ],
   server: {
     open: true,
+    fs: {
+      allow: [path.resolve(__dirname, "..")],
+    },
     proxy: {
       "/panic-data": {
         target: "http://127.0.0.1:5000",

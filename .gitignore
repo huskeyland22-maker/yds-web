@@ -23,3 +23,10 @@ supabase/.temp/
 
 # Local research and OHLCV caches
 scripts/.cache/
+.cache/credit-cycle/
+fixtures/credit-cycle/live-cache/
+reports/credit-cycle-backtest-raw.json
+reports/credit-cycle-pit-backtest-raw.json
+reports/credit-cycle-alfred-fetch-summary.json
+reports/credit-cycle-fdic-industry-summary.json
+reports/credit-cycle-phase4-warning-validation-raw.json

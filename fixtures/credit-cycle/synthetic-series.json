@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "note": "Synthetic fixture for unit tests only — not real market data",
+    "pit": "Each point includes release_date = observation_date + lag"
+  },
+  "daily_risk_up": [
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-02", "release_date": "2020-01-03", "value": 1.0, "frequency": "daily", "source": "fixture" },
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-03", "release_date": "2020-01-06", "value": 1.1, "frequency": "daily", "source": "fixture" },
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-06", "release_date": "2020-01-07", "value": 1.2, "frequency": "daily", "source": "fixture" },
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-07", "release_date": "2020-01-08", "value": 1.5, "frequency": "daily", "source": "fixture" },
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-08", "release_date": "2020-01-09", "value": 2.0, "frequency": "daily", "source": "fixture" },
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-09", "release_date": "2020-01-10", "value": 3.0, "frequency": "daily", "source": "fixture" },
+    { "series_id": "SYN_DAILY", "observation_date": "2020-01-10", "release_date": "2020-01-13", "value": 5.0, "frequency": "daily", "source": "fixture" }
+  ],
+  "quarterly_sloos_like": [
+    { "series_id": "DRTSCILM", "observation_date": "2007-01-01", "release_date": "2007-02-15", "value": 5, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2007-04-01", "release_date": "2007-05-15", "value": 10, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2007-07-01", "release_date": "2007-08-15", "value": 25, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2007-10-01", "release_date": "2007-11-15", "value": 40, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2008-01-01", "release_date": "2008-02-15", "value": 55, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2008-04-01", "release_date": "2008-05-15", "value": 70, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2008-07-01", "release_date": "2008-08-15", "value": 80, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2008-10-01", "release_date": "2008-11-15", "value": 85, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2009-01-01", "release_date": "2009-02-15", "value": 60, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2009-04-01", "release_date": "2009-05-15", "value": 40, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2009-07-01", "release_date": "2009-08-15", "value": 20, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2009-10-01", "release_date": "2009-11-15", "value": 10, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2010-01-01", "release_date": "2010-02-15", "value": 5, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2010-04-01", "release_date": "2010-05-15", "value": 0, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2010-07-01", "release_date": "2010-08-15", "value": -5, "frequency": "quarterly", "source": "fixture" },
+    { "series_id": "DRTSCILM", "observation_date": "2010-10-01", "release_date": "2010-11-15", "value": -10, "frequency": "quarterly", "source": "fixture" }
+  ]
+}
