@@ -1522,6 +1522,14 @@
   padding: 0.35rem 0.15rem 1.5rem;
 }
 
+/* Credit Cycle is a full analysis surface — do not keep hub link-list width. */
+.app-shell-host.yds-theme-premium .yds-menu-hub--credit {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0.25rem 0 1.5rem;
+}
+
 .app-shell-host.yds-theme-premium .yds-menu-hub__eyebrow {
   margin: 0 0 0.35rem;
   color: #c4b5fd;

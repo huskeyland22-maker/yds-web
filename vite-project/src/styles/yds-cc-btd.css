@@ -1,0 +1,230 @@
+/* Credit Cycle × Buy-the-Dip joint panel — scoped. No score-merge chrome. */
+
+.yds-cc-btd {
+  --cc-btd-bg: #0b1220;
+  --cc-btd-panel: #111827;
+  --cc-btd-border: rgba(148, 163, 184, 0.2);
+  --cc-btd-text: #e2e8f0;
+  --cc-btd-muted: #94a3b8;
+  --cc-btd-accent: #a78bfa;
+  color: var(--cc-btd-text);
+  background:
+    radial-gradient(700px 240px at 0% 0%, rgba(124, 58, 237, 0.16), transparent 55%),
+    var(--cc-btd-bg);
+  border: 1px solid var(--cc-btd-border);
+  border-radius: 14px;
+  padding: 0.95rem 1rem 1.1rem;
+  min-width: 0;
+}
+
+.yds-cc-btd__kicker {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cc-btd-accent);
+  font-weight: 600;
+}
+
+.yds-cc-btd__title {
+  margin: 0.25rem 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.yds-cc-btd__lead,
+.yds-cc-btd__body,
+.yds-cc-btd__meta,
+.yds-cc-btd__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--cc-btd-muted);
+}
+
+.yds-cc-btd__signal {
+  margin: 0.65rem 0 0.75rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.7);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-cc-btd__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.yds-cc-btd__card {
+  background: var(--cc-btd-panel);
+  border: 1px solid var(--cc-btd-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  min-width: 0;
+}
+
+.yds-cc-btd__card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.yds-cc-btd__sub {
+  margin: 0.65rem 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--cc-btd-accent);
+}
+
+.yds-cc-btd__metric {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: #f8fafc;
+}
+
+.yds-cc-btd__metric-unit {
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cc-btd-muted);
+  letter-spacing: 0.04em;
+}
+
+.yds-cc-btd__kv {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.yds-cc-btd__kv li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 0.28rem;
+}
+
+.yds-cc-btd__kv span {
+  color: var(--cc-btd-muted);
+}
+
+.yds-cc-btd__lines {
+  margin: 0.45rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-cc-btd__stale {
+  margin: 0.5rem 0 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(120, 53, 15, 0.28);
+  color: #fcd34d;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.yds-cc-btd__card--joint {
+  margin-bottom: 0.65rem;
+}
+
+.yds-cc-btd__premium {
+  margin-bottom: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(167, 139, 250, 0.4);
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.yds-cc-btd__premium h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: #ddd6fe;
+}
+
+.yds-cc-btd__footer {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+.yds-cc-btd__footer a {
+  color: #c4b5fd;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.yds-cc-btd__footer a:hover {
+  text-decoration: underline;
+}
+
+.yds-cc-btd__sep {
+  color: var(--cc-btd-muted);
+}
+
+/* Place beside DBB detail on wide screens when inside .yds-dbb-dash */
+.yds-dbb-dash:has(> .yds-cc-btd) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+}
+
+@media (min-width: 1100px) {
+  .yds-dbb-dash:has(> .yds-cc-btd) {
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.75fr);
+    grid-template-areas:
+      "detail credit"
+      "trade trade";
+  }
+
+  .yds-dbb-dash:has(> .yds-cc-btd) > .yds-dbb-dash__detail {
+    grid-area: detail;
+    min-height: 0;
+    align-self: start;
+  }
+
+  .yds-dbb-dash:has(> .yds-cc-btd) > .yds-cc-btd {
+    grid-area: credit;
+    align-self: start;
+    position: sticky;
+    top: 0.75rem;
+  }
+
+  .yds-dbb-dash:has(> .yds-cc-btd) > .yds-dbb-dash__trade {
+    grid-area: trade;
+  }
+}
+
+@media (max-width: 720px) {
+  .yds-cc-btd__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-cc-btd {
+    padding: 0.8rem 0.75rem 0.95rem;
+  }
+
+  .yds-cc-btd__metric {
+    font-size: 1.45rem;
+  }
+}

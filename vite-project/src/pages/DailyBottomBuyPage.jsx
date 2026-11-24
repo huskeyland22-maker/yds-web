@@ -32,6 +32,7 @@ import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import DbbReturnHorizonNote from "../components/dbb/DbbReturnHorizonNote.jsx"
 import DbbSplitSimResearchNote from "../components/dbb/DbbSplitSimResearchNote.jsx"
+import CreditCycleBtdContextPanel from "../components/dbb/CreditCycleBtdContextPanel.jsx"
 import {
   classifyEtfInvestDecision,
   formatEtfDbbStatusLabel,
@@ -208,6 +209,27 @@ export default function DailyBottomBuyPage() {
       (payload?.all || []).map((card) => etfCardProgressEntry(card)).filter(Boolean),
     )
   }, [payload, recordsVersion])
+
+  const creditBuySide = useMemo(() => {
+    if (!selected) {
+      return {
+        product: "etf",
+        symbol: null,
+        scoreNOf4: null,
+        stageLabel: null,
+        buyOk: false,
+        priceAsOf: null,
+      }
+    }
+    return {
+      product: "etf",
+      symbol: selected.symbol || null,
+      scoreNOf4: selected.ok ? selected.count ?? null : null,
+      stageLabel: selected.ok ? selected.stage?.label || null : null,
+      buyOk: Boolean(selected.ok),
+      priceAsOf: pickEtfDataAsOf(selected) || selected.asOfDate || null,
+    }
+  }, [selected])
 
   function onAck(sym, kind) {
     acknowledgeEpisodeTranche(sym, kind)
@@ -572,6 +594,8 @@ export default function DailyBottomBuyPage() {
                 ) : null}
               </div>
 
+              <CreditCycleBtdContextPanel buySide={creditBuySide} />
+
               <section className="yds-dbb-card yds-dbb-dash__trade" aria-label="매수 기록">
                 <h2 className="yds-dbb-section__title">매수 기록</h2>
                 <p className="yds-dbb__notice-muted mt-2">
@@ -590,9 +614,21 @@ export default function DailyBottomBuyPage() {
               </section>
             </div>
           ) : (
-            <p className="yds-dbb__status" role="status">
-              종목을 선택하면 현재 상태와 매수 기록 입력이 표시됩니다. 선택 전에는 기록이 저장되지 않습니다.
-            </p>
+            <>
+              <section className="yds-dbb-card yds-dbb-select-hint mb-3" role="status">
+                <h2 className="yds-dbb-section__title">ETF를 선택하세요</h2>
+                <p className="yds-dbb__meta mt-2">
+                  후보·목록·품질 카드에서 ETF를 고르면 기존 Buy-the-Dip 엔진의 N/4 점수·단계·조건이
+                  여기에 표시됩니다. 선택 전에는 매수 기록이 저장되지 않습니다.
+                </p>
+                <p className="yds-dbb__meta">
+                  오른쪽(또는 아래) Credit Cycle 패널의 CCI는 매수 점수와 합산하지 않습니다.
+                </p>
+              </section>
+              <div className="mb-3">
+                <CreditCycleBtdContextPanel buySide={creditBuySide} />
+              </div>
+            </>
           )}
 
           <section className="yds-dbb-section" aria-label="전체 ETF 목록">

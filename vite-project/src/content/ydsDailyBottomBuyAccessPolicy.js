@@ -31,6 +31,29 @@ export const DBB_PRO_ONLY = Object.freeze([
   "pro_analysis_copy",
 ])
 
+/**
+ * Credit Cycle context on DBB pages (Phase 14).
+ * Macro credit fields stay FREE and are never folded into DBB_PRO_ONLY / N/4 score.
+ * Premium cross-analysis keys are reserved for a future gate — not locked in Phase 14.
+ */
+export const CC_ON_DBB_FREE_VISIBLE = Object.freeze([
+  "cci_level",
+  "as_of_date",
+  "coverage_pct",
+  "pit_label",
+  "stale_indicator_names",
+  "credit_summary_lines",
+  "joint_compare_note",
+  "link_to_credit_cycle",
+])
+
+export const CC_ON_DBB_PREMIUM_RESERVED = Object.freeze([
+  "cross_regime_vs_dbb_stage",
+  "indicator_weight_breakdown",
+  "historical_similar_credit_windows",
+  "buy_stage_credit_risk_notes",
+])
+
 export const DBB_SHARED_PRO_LOCK_COPY = Object.freeze({
   title: "PRO 전용 상세 분석입니다",
   body: "조건별 상세 지표와 신호 해석은 PRO에서 확인할 수 있습니다. 종목·섹터·후보 목록·간략 상태·점수(N/4)는 FREE에서도 동일하게 제공됩니다.",

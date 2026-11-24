@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
 import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
 import DbbMembershipAccessNotice from "../components/dbb/DbbMembershipAccessNotice.jsx"
+import CreditCycleBtdContextPanel from "../components/dbb/CreditCycleBtdContextPanel.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
@@ -382,6 +383,27 @@ export default function EquityDailyBottomBuyPage() {
   const dd120Text = detailMatchesSymbol ? formatDd120(view?.dd120) : null
   const selectedProgress = buyProgress.find((item) => item.symbol === symbol) || null
 
+  const creditBuySide = useMemo(() => {
+    if (!detailMatchesSymbol || !view) {
+      return {
+        product: "equity",
+        symbol: symbol || null,
+        scoreNOf4: null,
+        stageLabel: null,
+        buyOk: false,
+        priceAsOf: null,
+      }
+    }
+    return {
+      product: "equity",
+      symbol: view.symbol || symbol || null,
+      scoreNOf4: view.score ?? null,
+      stageLabel: view.state?.label || null,
+      buyOk: Boolean(view.ok),
+      priceAsOf: view.asOf || null,
+    }
+  }, [detailMatchesSymbol, view, symbol])
+
   return (
     <div className="yds-dbb yds-dbb--equity-dash min-w-0 w-full">
       <header className="yds-dbb__hero">
@@ -529,15 +551,28 @@ export default function EquityDailyBottomBuyPage() {
       <div className="yds-dbb-dash mb-3">
         <div className="yds-dbb-dash__detail">
           {loading || detailPending ? (
-            <p className="yds-dbb__status" role="status">
-              {detailPending ? `${symbol} 상세를 불러오는 중…` : "불러오는 중…"}
-            </p>
+            <section className="yds-dbb-card yds-dbb-card--compact yds-dbb-state-card" role="status">
+              <h2 className="yds-dbb-section__title">분석 상태</h2>
+              <p className="yds-dbb__meta mt-1.5">
+                {detailPending
+                  ? `${symbol} 상세를 불러오는 중…`
+                  : "워치리스트·시세 데이터를 불러오는 중…"}
+              </p>
+              <p className="yds-dbb__meta">임의 분석 결과를 표시하지 않습니다.</p>
+            </section>
           ) : null}
 
           {!loading && !detailPending && (!view || !view.ok) ? (
-            <p className="yds-dbb__status" role="status">
-              {view?.message || payload?.message || "데이터 준비 중"}
-            </p>
+            <section className="yds-dbb-card yds-dbb-card--compact yds-dbb-state-card" role="status">
+              <h2 className="yds-dbb-section__title">데이터 없음</h2>
+              <p className="yds-dbb__meta mt-1.5">
+                {view?.message || payload?.message || "선택 종목의 Buy-the-Dip 분석을 아직 확정할 수 없습니다."}
+              </p>
+              <p className="yds-dbb__meta">
+                시세·조건이 준비되면 기존 엔진의 N/4 결과가 표시됩니다. Credit Cycle CCI는 독립
+                참고입니다.
+              </p>
+            </section>
           ) : null}
 
           {detailMatchesSymbol ? (
@@ -655,6 +690,8 @@ export default function EquityDailyBottomBuyPage() {
             </>
           ) : null}
         </div>
+
+        <CreditCycleBtdContextPanel buySide={creditBuySide} />
 
         <section className="yds-dbb-card yds-dbb-dash__trade" aria-label="매수 기록">
           <h2 className="yds-dbb-section__title">매수 기록</h2>

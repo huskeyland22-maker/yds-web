@@ -1655,3 +1655,89 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* —— Phase 16 layout polish (ETF + Equity) —— */
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard,
+.app-shell-host.yds-theme-premium .yds-dbb--equity-dash {
+  width: 100%;
+  max-width: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-select-hint,
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-state-card {
+  min-height: 0;
+  padding: 0.9rem 1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-select-hint .yds-dbb-section__title,
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-state-card .yds-dbb-section__title {
+  font-size: 1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__ticker {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__score,
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__type {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__row {
+  font-size: 0.9rem;
+  min-height: 2.75rem;
+  gap: 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__sym {
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__count {
+  font-size: 0.95rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__stage {
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card__count {
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-dash__detail > .yds-dbb__status {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--yds-border);
+  background: var(--yds-bg-elevated);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-invest-cards {
+  gap: 0.85rem;
+}
+
+@media (min-width: 1100px) {
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-invest-cards {
+    align-items: stretch;
+  }
+}
