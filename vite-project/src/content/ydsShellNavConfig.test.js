@@ -15,6 +15,7 @@ function findItem(id) {
         path: main.path,
         matchPaths: main.matchPaths,
         emphasis: main.emphasis,
+        englishLabel: main.englishLabel,
       }
     }
     for (const item of main.items ?? []) {
@@ -30,19 +31,26 @@ function findItem(id) {
 }
 
 describe("ydsShellNavConfig — 5대메뉴 IA", () => {
-  it("exposes five Korean top-level menus", () => {
+  it("exposes five top-level menus with YDS 인사이트 rename", () => {
     expect(SHELL_NAV_MAIN.map((entry) => entry.label)).toEqual([
-      "시장 브리핑",
+      "YDS 인사이트",
       "신용 사이클",
       "조정 매수 전략",
       "리서치",
       "기타 기능",
     ])
-    expect(SHELL_NAV_MAIN.every((entry) => !/[A-Z]{3,}/.test(entry.label) || entry.label === "About")).toBe(true)
+    expect(SHELL_NAV_MAIN.some((entry) => entry.label === "시장 브리핑")).toBe(false)
+    expect(findItem("market-briefing")?.englishLabel).toBe("YDS INSIGHT")
+    const allowedLatin = new Set(["About", "YDS 인사이트"])
+    expect(
+      SHELL_NAV_MAIN.every(
+        (entry) => !/[A-Z]{3,}/.test(entry.label) || allowedLatin.has(entry.label),
+      ),
+    ).toBe(true)
   })
 
-  it("wires 시장 브리핑 and strategy leaves to live pages, not hubs", () => {
-    expect(findItem("market-briefing")?.path).toBe("/market-analysis")
+  it("wires YDS 인사이트 to home and keeps market-analysis URLs live", () => {
+    expect(findItem("market-briefing")?.path).toBe("/")
     expect(findItem("credit-cycle")?.path).toBe("/credit-cycle")
     expect(SHELL_NAV_MAIN.find((entry) => entry.id === "credit-cycle")?.statusLabel).toBeUndefined()
 
@@ -70,11 +78,14 @@ describe("ydsShellNavConfig — 5대메뉴 IA", () => {
     expect(more?.items?.some((entry) => entry.path === "/portfolio")).toBe(true)
     expect(more?.items?.some((entry) => entry.path === "/stock-picks")).toBe(true)
     expect(more?.items?.some((entry) => entry.id === "panic-lab")).toBe(false)
+    expect(getShellNavHub("market-briefing")?.title).toBe("YDS 인사이트")
     expect(getShellNavHub("market-briefing")?.links.map((link) => link.path)).toContain("/market-analysis")
   })
 
-  it("activates direct routes and expands strategy when nested path is open", () => {
-    expect(shellNavItemIsActive(findItem("market-briefing"), { pathname: "/market-analysis" })).toBe(true)
+  it("activates home for YDS 인사이트 and market-analysis for panic leaf", () => {
+    expect(shellNavItemIsActive(findItem("market-briefing"), { pathname: "/" })).toBe(true)
+    expect(shellNavItemIsActive(findItem("market-briefing"), { pathname: "/market-analysis" })).toBe(false)
+    expect(shellNavItemIsActive(findItem("market-briefing"), { pathname: "/credit-cycle" })).toBe(false)
     expect(shellNavItemIsActive(findItem("panic-index"), { pathname: "/market-analysis" })).toBe(true)
     expect(shellNavItemIsActive(findItem("fear-buy-strategy"), { pathname: "/market-analysis" })).toBe(false)
     expect(shellNavItemIsActive(findItem("etf-buy"), { pathname: "/daily-bottom-buy" })).toBe(true)
@@ -91,5 +102,6 @@ describe("ydsShellNavConfig — 5대메뉴 IA", () => {
     expect(shellNavMainContainsPath(strategy, { pathname: "/daily-bottom-buy" })).toBe(true)
     expect(shellNavMainContainsPath(strategy, { pathname: "/panic-lab" })).toBe(true)
     expect(shellNavMainContainsPath(strategy, { pathname: "/lab" })).toBe(false)
+    expect(shellNavMainContainsPath(strategy, { pathname: "/" })).toBe(false)
   })
 })

@@ -10,6 +10,7 @@
  *   path: string
  *   alias?: boolean
  *   emphasis?: boolean
+ *   englishLabel?: string
  *   matchPaths?: string[]
  * }} ShellNavItem */
 
@@ -27,6 +28,7 @@
  *   path?: string
  *   matchPaths?: string[]
  *   emphasis?: boolean
+ *   englishLabel?: string
  *   statusLabel?: string
  *   sections?: ShellNavSection[]
  *   items?: ShellNavItem[]
@@ -38,8 +40,8 @@ export const SHELL_NAV_HUBS = {
   "market-briefing": {
     id: "market-briefing",
     path: "/market-briefing",
-    title: "시장 브리핑",
-    subtitle: "시장 위험 · 매크로·유동성 · 시장 리포트를 한곳에서 엽니다.",
+    title: "YDS 인사이트",
+    subtitle: "YDS INSIGHT · 시장 상황과 투자 판단을 한눈에 확인합니다.",
     links: [
       { id: "market-analysis", label: "시장 위험 분석", path: "/market-analysis" },
       {
@@ -114,11 +116,12 @@ export const SHELL_NAV_HUBS = {
 export const SHELL_NAV_MAIN = [
   {
     id: "market-briefing",
-    label: "시장 브리핑",
+    label: "YDS 인사이트",
+    englishLabel: "YDS INSIGHT",
     kind: "link",
-    path: "/market-analysis",
+    path: "/",
     emphasis: true,
-    matchPaths: ["/market-analysis", "/market-briefing", "/macro-risk", "/market-dashboard"],
+    matchPaths: ["/", "/market-briefing"],
   },
   {
     id: "credit-cycle",
@@ -277,18 +280,24 @@ export const SHELL_NAV_FOOTER = [
  * @param {ShellNavItem | ShellNavMain} item
  * @param {{ pathname: string, hash?: string }} location
  */
+function pathMatchesLocation(path, pathname) {
+  if (!path) return false
+  if (path === "/") return pathname === "/"
+  return pathname === path || pathname.startsWith(`${path}/`)
+}
+
 export function shellNavItemIsActive(item, location) {
   if (!item || item.alias) return false
   const pathname = String(location?.pathname ?? "")
 
-  // 시장 브리핑(탑)과 패닉지수 분석은 동일 /market-analysis 를 공유 — 둘 다 활성 가능
-  if (pathname === item.path) return true
+  // YDS 인사이트(/)와 패닉지수 분석(/market-analysis)은 경로를 분리한다.
+  if (pathMatchesLocation(item.path, pathname)) return true
 
   if (!Array.isArray(item.matchPaths) || !item.matchPaths.length) {
-    return Boolean(item.path) && pathname.startsWith(`${item.path}/`)
+    return false
   }
 
-  return item.matchPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`))
+  return item.matchPaths.some((path) => pathMatchesLocation(path, pathname))
 }
 
 /** @param {ShellNavMain} main */
@@ -313,9 +322,7 @@ export function shellNavMainCollectPaths(main) {
 /** @param {ShellNavMain} main @param {{ pathname: string }} location */
 export function shellNavMainContainsPath(main, location) {
   const pathname = String(location?.pathname ?? "")
-  return shellNavMainCollectPaths(main).some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  )
+  return shellNavMainCollectPaths(main).some((path) => pathMatchesLocation(path, pathname))
 }
 
 /** @param {string} hubId */

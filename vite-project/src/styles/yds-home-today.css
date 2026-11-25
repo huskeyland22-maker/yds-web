@@ -1,0 +1,290 @@
+/**
+ * YDS 전용 홈 — 딥 네이비 · 절제된 보라 강조 · 큰 숫자 · 짧은 설명
+ */
+
+.yds-home {
+  --home-navy: #0b1220;
+  --home-navy-elev: #121a2b;
+  --home-navy-line: rgba(148, 163, 184, 0.14);
+  --home-text: #e8eef8;
+  --home-muted: #94a3b8;
+  --home-violet: #8b7cf6;
+  --home-violet-soft: rgba(139, 124, 246, 0.14);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0.25rem 0 1.5rem;
+  color: var(--home-text);
+}
+
+.yds-home__hero {
+  padding: 0.85rem 0 1.35rem;
+  border-bottom: 1px solid var(--home-navy-line);
+}
+
+.yds-home__brand {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--home-violet);
+}
+
+.yds-home__title {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.85rem, 3.4vw, 2.45rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--home-text);
+}
+
+.yds-home__lead {
+  margin: 0.55rem 0 0;
+  max-width: 36rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--home-muted);
+}
+
+.yds-home__asof {
+  margin: 0.55rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--home-muted) 92%, transparent);
+}
+
+.yds-home__judgment {
+  margin-top: 1.15rem;
+  padding: 1.05rem 1.15rem 1.1rem;
+  border: 1px solid var(--home-navy-line);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, var(--home-violet-soft), transparent 58%),
+    var(--home-navy-elev);
+}
+
+.yds-home__judgment-kicker {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--home-violet);
+}
+
+.yds-home__judgment-title {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: var(--home-text);
+}
+
+.yds-home__judgment-list {
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.yds-home__judgment-list li {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--home-muted);
+  padding-left: 0.85rem;
+  position: relative;
+}
+
+.yds-home__judgment-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--home-violet);
+  opacity: 0.85;
+}
+
+.yds-home__grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .yds-home__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+.yds-home-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 1rem 1.05rem 0.95rem;
+  border: 1px solid var(--home-navy-line);
+  border-radius: 10px;
+  background: var(--home-navy-elev);
+  text-decoration: none;
+  color: inherit;
+}
+
+.yds-home-card--link {
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.yds-home-card--link:hover {
+  border-color: color-mix(in srgb, var(--home-violet) 45%, var(--home-navy-line));
+  background: color-mix(in srgb, var(--home-violet-soft) 40%, var(--home-navy-elev));
+}
+
+.yds-home-card--link:focus-visible {
+  outline: 2px solid var(--home-violet);
+  outline-offset: 2px;
+}
+
+.yds-home-card__head {
+  margin-bottom: 0.55rem;
+}
+
+.yds-home-card__kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--home-violet);
+}
+
+.yds-home-card__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.yds-home-card__body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--home-muted);
+  flex: 1;
+}
+
+.yds-home-card__metric {
+  margin: 0.15rem 0 0.55rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.yds-home-card__num {
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--home-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.yds-home-card__unit {
+  font-size: 0.85rem;
+  color: var(--home-muted);
+}
+
+.yds-home-card__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 0.75rem;
+  flex: 1;
+}
+
+.yds-home-card__facts--metrics {
+  grid-template-columns: 1fr 1fr;
+}
+
+.yds-home-card__facts dt {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--home-muted);
+}
+
+.yds-home-card__facts dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--home-text);
+}
+
+.yds-home-card__dd-lg {
+  font-size: 1.25rem !important;
+  letter-spacing: -0.02em;
+}
+
+.yds-home-card__meta {
+  margin: 0.65rem 0 0;
+  font-size: 0.75rem;
+  color: var(--home-muted);
+}
+
+.yds-home-card__cta {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--home-violet);
+}
+
+.yds-home__dbb-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+.yds-home__dbb-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--home-navy) 55%, transparent);
+  text-decoration: none;
+  color: inherit;
+}
+
+.yds-home__dbb-row:hover {
+  border-color: color-mix(in srgb, var(--home-violet) 35%, transparent);
+}
+
+.yds-home__dbb-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--home-text);
+}
+
+.yds-home__dbb-value {
+  font-size: 0.8rem;
+  color: var(--home-muted);
+  line-height: 1.35;
+}
+
+@media (max-width: 419px) {
+  .yds-home-card__facts--metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-home-card {
+    min-height: 0;
+  }
+}

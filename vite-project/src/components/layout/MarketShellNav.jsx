@@ -18,6 +18,10 @@ function NavItem({ item, onNavigate, badge = 0, statusLabel = "" }) {
       to={item.path}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
+      aria-label={
+        item.englishLabel ? `${item.label} (${item.englishLabel})` : undefined
+      }
+      title={item.englishLabel || undefined}
       className={[
         "yds-market-nav__link",
         active ? "is-active" : null,
@@ -91,6 +95,7 @@ export default function MarketShellNav({
                   path: main.path,
                   emphasis: main.emphasis,
                   matchPaths: main.matchPaths,
+                  englishLabel: main.englishLabel,
                 }}
                 statusLabel={main.statusLabel || ""}
                 onNavigate={onNavigate}

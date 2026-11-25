@@ -77,6 +77,7 @@ import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
 import AdminStockPickDebugPage from "./pages/AdminStockPickDebugPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
 import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.jsx"
+import YdsHomePage from "./pages/YdsHomePage.jsx"
 import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
 import { isHomeV5ValidationRoute } from "./home-preview/homeV5ValidationRoute.js"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
@@ -1490,7 +1491,14 @@ function App() {
 
         <main className="app-main-host min-h-0 flex-1 px-2.5 py-2 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 lg:overflow-y-auto lg:overscroll-contain lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
-            <Route path="/" element={<Navigate to="/daily-bottom-buy" replace />} />
+            <Route
+              path="/"
+              element={
+                <SectionErrorBoundary label="오늘 한눈">
+                  <YdsHomePage />
+                </SectionErrorBoundary>
+              }
+            />
             <Route path="/market-briefing" element={<Navigate to="/market-analysis" replace />} />
             <Route
               path="/credit-cycle"
