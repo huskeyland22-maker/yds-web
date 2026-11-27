@@ -1,0 +1,302 @@
+{
+  "schema_version": "core_risk-snapshot-0.1.0",
+  "generated_at": "2026-11-27T08:59:34.187Z",
+  "feed_status": "VERIFIED_PRODUCT_FEED",
+  "verification": {
+    "verified": true,
+    "checks": [
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "STANDARDS_LM:147"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "STANDARDS_SMALL:147"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "DEMAND_LM:141"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "DEMAND_SMALL:141"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "H8_LEVEL:2811"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "H8_YOY:2759"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "H8_WOW:2810"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "DELINQUENCY:158"
+      },
+      {
+        "ok": true,
+        "code": "SERIES_PRESENT",
+        "detail": "CHARGEOFF:166"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "STANDARDS_LM:28"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "STANDARDS_SMALL:28"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "DEMAND_LM:28"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "DEMAND_SMALL:28"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "DELINQUENCY:28"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "CHARGEOFF:28"
+      },
+      {
+        "ok": true,
+        "code": "GAP_2011_2017_OK",
+        "detail": "H8_LEVEL:365"
+      },
+      {
+        "ok": true,
+        "code": "HISTORY_OK",
+        "detail": "STANDARDS_LM"
+      },
+      {
+        "ok": true,
+        "code": "HISTORY_OK",
+        "detail": "H8_LEVEL"
+      }
+    ],
+    "pit_class": "NON_STRICT_PIT"
+  },
+  "core_risk": {
+    "namespace": "core_risk",
+    "schema_version": "core_risk-0.1.0",
+    "feed_status": "VERIFIED_PRODUCT_FEED",
+    "as_of": "2026-06-30",
+    "observation_period": "2026-06-30",
+    "retrieval_date": "2026-11-27",
+    "R_core": 60,
+    "r_status": "OK",
+    "domain_scores": {
+      "supply": 64,
+      "quantity": 23,
+      "realized": 93
+    },
+    "domain_detail": {
+      "supply": 64,
+      "standards_block": 64,
+      "demand_block": 31,
+      "quantity": 23,
+      "realized": 93,
+      "size_divergence": 15,
+      "supply_demand_divergence": 33
+    },
+    "feature_scores_by_id": {
+      "CREDIT_SUPPLY_SLOOS_CI_STANDARDS_LARGE_MEDIUM": {
+        "score": 64,
+        "status": "OK",
+        "n": 40,
+        "reason": null,
+        "short_key": "STANDARDS_LM"
+      },
+      "CREDIT_SUPPLY_SLOOS_CI_STANDARDS_SMALL": {
+        "score": 49,
+        "status": "OK",
+        "n": 40,
+        "reason": null,
+        "short_key": "STANDARDS_SMALL"
+      },
+      "CREDIT_SUPPLY_SLOOS_CI_DEMAND_LARGE_MEDIUM": {
+        "score": 24,
+        "status": "OK",
+        "n": 40,
+        "reason": null,
+        "short_key": "DEMAND_LM"
+      },
+      "CREDIT_SUPPLY_SLOOS_CI_DEMAND_SMALL": {
+        "score": 31,
+        "status": "OK",
+        "n": 40,
+        "reason": null,
+        "short_key": "DEMAND_SMALL"
+      },
+      "CREDIT_REALIZED_CI_DELINQUENCY_SA": {
+        "score": 69,
+        "status": "OK",
+        "n": 40,
+        "reason": null,
+        "short_key": "DELINQUENCY"
+      },
+      "CREDIT_REALIZED_CI_CHARGEOFF_SA": {
+        "score": 93,
+        "status": "OK",
+        "n": 40,
+        "reason": null,
+        "short_key": "CHARGEOFF"
+      },
+      "CREDIT_QUANTITY_H8_CI_YOY_52W": {
+        "score": 24,
+        "status": "OK",
+        "n": 522,
+        "reason": null,
+        "short_key": "H8_YOY"
+      },
+      "CREDIT_QUANTITY_H8_CI_LOANS_SA": {
+        "score": 22,
+        "status": "OK",
+        "n": 522,
+        "reason": null,
+        "short_key": "H8_LEVEL_GROWTH"
+      }
+    },
+    "window_years_candidate": 10,
+    "window_status": "WINDOW_NOT_CALIBRATED",
+    "weight_scheme": "EQUAL_DOMAIN_CANDIDATE",
+    "weight_status": "WEIGHT_NOT_CALIBRATED",
+    "risk_grade": null,
+    "grade_status": "GRADE_NOT_CALIBRATED",
+    "pit_class": "NON_STRICT_PIT",
+    "confidence": {
+      "pit_class": "NON_STRICT_PIT",
+      "release_date_known": false,
+      "coverage_domains": 3,
+      "r_status": "OK",
+      "risk_coupled": false
+    },
+    "conflict_flags": [
+      {
+        "code": "SUPPLY_QUANTITY_CONFLICT",
+        "additive": false,
+        "note": "Descriptive flag only; thresholds NOT_CALIBRATED"
+      }
+    ],
+    "confirmation_flag": true,
+    "unavailable_features": [],
+    "calibration_status": "NOT_CALIBRATED",
+    "notes": [
+      "Live product CORE Risk from Board-official DDP/HTML feed.",
+      "WINDOW_NOT_CALIBRATED · WEIGHT_NOT_CALIBRATED · GRADE_NOT_CALIBRATED · NON_STRICT_PIT",
+      "Confidence ≠ Risk. Conflict non-additive. Independent of CCI / Panic / Soft State.",
+      "Distinct from research_reference_only historical tip (2026-06-30=60).",
+      "Note: live tip happens to match research reference as_of/value — still labeled VERIFIED_PRODUCT_FEED from Board recompute, not a copy of research JSON."
+    ],
+    "independent_of": [
+      "legacy_cci",
+      "panic",
+      "soft_state",
+      "section_25_overall_score"
+    ],
+    "coverage": {
+      "status": "OK",
+      "domains": {
+        "supply": true,
+        "quantity": true,
+        "realized": true
+      }
+    }
+  },
+  "research_reference_only": {
+    "note": "Do not render as live product scores.",
+    "doc": "docs/research10-credit-architecture/46-integrated-credit-risk-model-validation.md",
+    "example_historical_tip": {
+      "as_of": "2026-06-30",
+      "R_core": 60,
+      "label": "RESEARCH_VALIDATION_ONLY"
+    }
+  },
+  "panel_quality": {
+    "STANDARDS_LM": {
+      "n": 147,
+      "first": "1990-06-30",
+      "last": "2026-12-31",
+      "n_2011_2017": 28,
+      "n_future_vs_retrieval": 1
+    },
+    "STANDARDS_SMALL": {
+      "n": 147,
+      "first": "1990-06-30",
+      "last": "2026-12-31",
+      "n_2011_2017": 28,
+      "n_future_vs_retrieval": 1
+    },
+    "DEMAND_LM": {
+      "n": 141,
+      "first": "1991-12-31",
+      "last": "2026-12-31",
+      "n_2011_2017": 28,
+      "n_future_vs_retrieval": 1
+    },
+    "DEMAND_SMALL": {
+      "n": 141,
+      "first": "1991-12-31",
+      "last": "2026-12-31",
+      "n_2011_2017": 28,
+      "n_future_vs_retrieval": 1
+    },
+    "H8_LEVEL": {
+      "n": 2811,
+      "first": "1973-01-03",
+      "last": "2026-11-11",
+      "n_2011_2017": 365,
+      "n_future_vs_retrieval": 0
+    },
+    "H8_YOY": {
+      "n": 2759,
+      "first": "1974-01-02",
+      "last": "2026-11-11",
+      "n_2011_2017": 365,
+      "n_future_vs_retrieval": 0
+    },
+    "H8_WOW": {
+      "n": 2810,
+      "first": "1973-01-10",
+      "last": "2026-11-11",
+      "n_2011_2017": 365,
+      "n_future_vs_retrieval": 0
+    },
+    "DELINQUENCY": {
+      "n": 158,
+      "first": "1987-03-31",
+      "last": "2026-06-30",
+      "n_2011_2017": 28,
+      "n_future_vs_retrieval": 0
+    },
+    "CHARGEOFF": {
+      "n": 166,
+      "first": "1985-03-31",
+      "last": "2026-06-30",
+      "n_2011_2017": 28,
+      "n_future_vs_retrieval": 0
+    }
+  }
+}

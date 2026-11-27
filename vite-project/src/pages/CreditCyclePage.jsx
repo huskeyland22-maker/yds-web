@@ -1,13 +1,14 @@
-import CreditCycleDashboard from "../components/credit-cycle/CreditCycleDashboard.jsx"
+import CreditCycleOverviewBoard from "../components/credit-cycle/CreditCycleOverviewBoard.jsx"
 
 /**
- * Credit Cycle service page.
- * HY·BBB 수치는 라이선스 확인 전까지 비공개. Panic 점수와 합산하지 않음.
+ * Credit Cycle service page — overview board is the primary UX (reference 4-zone).
+ * Soft/legacy engine shell stays out of this Preview commit surface.
+ * HY·BBB stay cycle-only. Panic is never merged here.
  */
 export default function CreditCyclePage() {
   return (
     <div className="yds-menu-hub yds-menu-hub--credit">
-      <CreditCycleDashboard />
+      <CreditCycleOverviewBoard />
     </div>
   )
 }

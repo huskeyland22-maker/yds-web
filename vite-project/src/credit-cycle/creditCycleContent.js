@@ -1,11 +1,65 @@
 /** Static copy + analysis helpers for Credit Cycle UI — not trading signals. */
 
 export const TABS = [
-  { id: "overview", label: "종합 현황" },
+  { id: "overview", label: "개요" },
   { id: "indicators", label: "지표 상세" },
-  { id: "history", label: "과거 비교" },
-  { id: "strategy", label: "전략 연결" },
+  { id: "history", label: "과거 사이클 비교" },
+  { id: "strategy", label: "리스크 리포트" },
 ]
+
+/** 원본 시안 4단계 다이어그램 — 엔진 국면을 표시용으로만 매핑 (신규 점수 없음). */
+export const CREDIT_CYCLE_DIAGRAM_STEPS = [
+  {
+    id: "expansion",
+    label: "확장",
+    en: "Expanding",
+    tone: "green",
+    blurb: "신용 여건 우호, 위험 낮음",
+    regimes: ["Expansion"],
+  },
+  {
+    id: "normal",
+    label: "정상",
+    en: "Normal",
+    tone: "blue",
+    blurb: "대체로 안정, 모니터링",
+    regimes: ["Recovery"],
+  },
+  {
+    id: "warning",
+    label: "경계",
+    en: "Warning",
+    tone: "yellow",
+    blurb: "신용여건 악화 조짐, 위험 증가",
+    regimes: ["Overheating"],
+  },
+  {
+    id: "stress",
+    label: "위험",
+    en: "Stress",
+    tone: "red",
+    blurb: "신용 경색 가능성, 방어 전략 필요",
+    regimes: ["Tightening", "Crisis"],
+  },
+]
+
+/** 시안 표·요약용 위험도 라벨 (riskScore 구간만, 신규 임계값 아님). */
+export function creditRiskLevelLabel(riskScore) {
+  if (riskScore == null || !Number.isFinite(Number(riskScore))) return null
+  const s = Number(riskScore)
+  if (s < 40) return { id: "low", label: "낮음", tone: "green" }
+  if (s < 60) return { id: "neutral", label: "중립", tone: "yellow" }
+  if (s < 80) return { id: "watch", label: "주의", tone: "orange" }
+  return { id: "high", label: "높음", tone: "red" }
+}
+
+export const REGIME_SHORT_KO = {
+  Expansion: "확장",
+  Overheating: "과열",
+  Tightening: "긴축",
+  Crisis: "위기",
+  Recovery: "회복",
+}
 
 export const ANALYSIS_LENSES = [
   { id: "fact", label: "확인된 사실" },

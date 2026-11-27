@@ -1,0 +1,37 @@
+{
+  "entries": [
+    {
+      "file": "product_2026-06-30_2026-11-26T14-57-39-272Z.json",
+      "kind": "product",
+      "as_of": "2026-06-30",
+      "R_core": 60,
+      "feed_status": "VERIFIED_PRODUCT_FEED",
+      "content_hash": "3559ad3692ace5f1",
+      "saved_at": "2026-11-26T14:57:39.274Z",
+      "diff_vs_prev": {
+        "type": "CREATED"
+      }
+    },
+    {
+      "file": "product_2026-06-30_2026-11-27T09-02-09-601Z.json",
+      "kind": "product",
+      "as_of": "2026-06-30",
+      "R_core": 60,
+      "feed_status": "VERIFIED_PRODUCT_FEED",
+      "content_hash": "c8e398cc2884f585",
+      "saved_at": "2026-11-27T09:02:09.602Z",
+      "diff_vs_prev": {
+        "type": "COMPARE",
+        "R_core_delta": 0,
+        "as_of_changed": false,
+        "feed_status_prev": "VERIFIED_PRODUCT_FEED",
+        "feed_status_next": "VERIFIED_PRODUCT_FEED",
+        "domain_delta": {
+          "supply": 0,
+          "quantity": 0,
+          "realized": 0
+        }
+      }
+    }
+  ]
+}
